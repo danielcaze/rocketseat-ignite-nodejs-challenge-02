@@ -18,7 +18,7 @@ const usersController: FastifyPluginAsync = async (fastify, opts) => {
     try {
       await usersService.createUser(request.body);
       reply.status(201).send({ message: "User created successfully" });
-    } catch (error: any) {
+    } catch (error) {
       if (error.name === "CustomZodError" || error.name === "DatabaseError") {
         reply.status(400).send({
           name: error.name,

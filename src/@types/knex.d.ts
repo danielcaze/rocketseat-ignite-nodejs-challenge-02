@@ -1,5 +1,5 @@
 // eslint-disable-next-line
-import { type Knex } from "knex";
+import type { Knex } from "knex";
 
 declare module "knex/types/tables" {
   interface Tables {

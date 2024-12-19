@@ -50,7 +50,7 @@ export class UsersService {
         email: body.email,
         password: hashedPassword,
       });
-    } catch (error: any) {
+    } catch (error) {
       if ("code" in error) {
         throw new DatabaseError(error);
       }
