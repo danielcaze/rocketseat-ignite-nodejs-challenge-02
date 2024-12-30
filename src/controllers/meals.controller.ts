@@ -1,5 +1,5 @@
-import type { FastifyPluginAsync } from "fastify";
+import type { FastifyInstance } from "fastify";
 
-const mealsController: FastifyPluginAsync = async (fastify, opts) => {};
+const mealsController = async (fastify: FastifyInstance) => {};
 
 export default mealsController;

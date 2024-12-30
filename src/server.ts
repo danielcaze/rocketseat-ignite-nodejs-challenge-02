@@ -1,13 +1,16 @@
-import Fastify from "fastify";
+import { app } from "./app";
 import { env } from "./libs/dotenv";
-import usersController from "./controllers/users.controller";
-import mealsController from "./controllers/meals.controller";
+import { checkDatabaseConnection } from "./libs/knex";
 
-const fastify = Fastify({
-  logger: true,
-});
+const startServer = async () => {
+  try {
+    await checkDatabaseConnection();
 
-fastify.register(usersController, { prefix: "/users" });
-fastify.register(mealsController, { prefix: "/meals" });
+    await app.listen({ port: env.PORT });
+  } catch (error) {
+    app.log.error(`Error starting server: ${error.message}`);
+    process.exit(1);
+  }
+};
 
-fastify.listen({ port: env.PORT });
+startServer();

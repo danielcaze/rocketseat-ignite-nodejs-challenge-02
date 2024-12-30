@@ -5,7 +5,7 @@ export class DatabaseError {
   details: string;
 
   constructor(knexError: any) {
-    this.name = "Database Error";
+    this.name = "DatabaseError";
 
     this.statusCode = 500;
 

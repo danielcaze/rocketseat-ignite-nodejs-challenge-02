@@ -6,7 +6,7 @@ export class CustomZodError {
   details: { path: string; message: string }[];
 
   constructor(error: z.ZodError) {
-    this.name = "Validation Error";
+    this.name = "CustomZodError";
     this.statusCode = 400;
 
     const isBodyMissing = error.errors.some(
