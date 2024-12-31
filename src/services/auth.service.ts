@@ -1,11 +1,13 @@
 import { z } from "zod";
 import bcrypt from "bcrypt";
-import { CustomZodError } from "../utils/custom-zod-error";
 import db from "../libs/knex";
-import { TABLES } from "../enums/tables";
+import { Table } from "../enums/table";
 import { env } from "../libs/dotenv";
-import { DatabaseError } from "../utils/database-error";
+import { createDatabaseError } from "../utils/create-database-error";
 import { generateAccessToken, generateRefreshToken } from "../utils/tokens";
+import { createZodError } from "../utils/create-zod-error";
+import { AppError } from "../utils/app-error";
+import { ErrorCode, ErrorMessage, ErrorStatusCode } from "../enums/app-error";
 
 export class AuthService {
   private userRegisterBodySchema = z.object({
@@ -53,7 +55,7 @@ export class AuthService {
       body = this.userRegisterBodySchema.parse(requestBody);
     } catch (error) {
       if (error instanceof z.ZodError) {
-        throw new CustomZodError(error);
+        throw createZodError(error);
       }
       throw error;
     }
@@ -61,14 +63,14 @@ export class AuthService {
     const hashedPassword = await bcrypt.hash(body.password, 10);
 
     try {
-      await db(TABLES.USERS).insert({
+      await db(Table.USERS).insert({
         name: body.name,
         email: body.email,
         password: hashedPassword,
       });
     } catch (error) {
       if ("code" in error) {
-        throw new DatabaseError(error);
+        throw createDatabaseError(error);
       }
       throw error;
     }
@@ -85,19 +87,19 @@ export class AuthService {
       body = this.userLoginBodySchema.parse(requestBody);
     } catch (error) {
       if (error instanceof z.ZodError) {
-        throw new CustomZodError(error);
+        throw createZodError(error);
       }
       throw error;
     }
 
-    const user = await db(TABLES.USERS)
+    const user = await db(Table.USERS)
       .where({
         email: body.email,
       })
       .first();
 
     if (!user || !(await bcrypt.compare(body.password, user.password))) {
-      throw new Error("Invalid credentials");
+      throw new AppError(ErrorCode.INVALID_CREDENTIALS);
     }
 
     const accessToken = generateAccessToken(user);
@@ -107,7 +109,7 @@ export class AuthService {
     try {
       const sessionId = crypto.randomUUID();
 
-      await db(TABLES.SESSIONS).insert({
+      await db(Table.SESSIONS).insert({
         id: sessionId,
         user_id: user.id,
         refresh_token: refreshToken,
@@ -119,7 +121,7 @@ export class AuthService {
       return { accessToken, sessionId };
     } catch (error) {
       if ("code" in error) {
-        throw new DatabaseError(error);
+        throw createDatabaseError(error);
       }
       throw error;
     }
@@ -127,7 +129,7 @@ export class AuthService {
 
   async logout(sessionId: string) {
     try {
-      await db(TABLES.SESSIONS)
+      await db(Table.SESSIONS)
         .where({
           id: sessionId,
         })
@@ -137,7 +139,7 @@ export class AuthService {
         });
     } catch (error) {
       if ("code" in error) {
-        throw new DatabaseError(error);
+        throw createDatabaseError(error);
       }
       throw error;
     }
@@ -150,42 +152,42 @@ export class AuthService {
       body = this.userUpdatePasswordSchema.parse(requestBody);
     } catch (error) {
       if (error instanceof z.ZodError) {
-        throw new CustomZodError(error);
+        throw createZodError(error);
       }
       throw error;
     }
 
-    const verificationRecord = await db(TABLES.VERIFICATION_CODES)
+    const verificationRecord = await db(Table.VERIFICATION_CODES)
       .where({ user_id: body.userId, code: body.verificationCode })
       .andWhere("expires_at", ">=", new Date())
       .first();
 
     if (!verificationRecord) {
-      throw new Error("Invalid or expired verification code");
+      throw new AppError(ErrorCode.INVALID_OR_EXPIRED_VERIFICATION_CODE);
     }
 
     if (verificationRecord.used) {
-      throw new Error("Verification code has already been used");
+      throw new AppError(ErrorCode.VERIFICATION_CODE_USED);
     }
 
     try {
-      await db(TABLES.VERIFICATION_CODES)
+      await db(Table.VERIFICATION_CODES)
         .where({ id: verificationRecord.id })
         .update({ used: true });
 
       const hashedPassword = await bcrypt.hash(body.newPassword, 10);
 
-      await db(TABLES.USERS).where({ id: body.userId }).update({
+      await db(Table.USERS).where({ id: body.userId }).update({
         password: hashedPassword,
       });
 
-      await db(TABLES.SESSIONS)
+      await db(Table.SESSIONS)
         .where({ user_id: body.userId, revoked: false })
         .andWhereNot({ id: sessionId })
         .update({ revoked: true });
     } catch (error) {
       if ("code" in error) {
-        throw new DatabaseError(error);
+        throw createDatabaseError(error);
       }
       throw error;
     }

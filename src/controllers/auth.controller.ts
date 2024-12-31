@@ -1,8 +1,9 @@
 import type { FastifyInstance } from "fastify";
 import { AuthService } from "../services/auth.service";
 import { checkUserLoggedIn } from "../middlewares/check-user-logged-in";
-import { ACCESS_TOKEN_COOKIE, SESSION_ID_COOKIE } from "../enums/tokens";
+import { ACCESS_TOKEN_COOKIE, SESSION_ID_COOKIE } from "../enums/token";
 import { env } from "../libs/dotenv";
+import { AppError } from "../utils/app-error";
 
 const authController = async (fastify: FastifyInstance) => {
   const authService = new AuthService();
@@ -28,15 +29,17 @@ const authController = async (fastify: FastifyInstance) => {
 
       res.status(200).send({ message: "User logged in successfully" });
     } catch (error) {
-      if (error.name === "CustomZodError" || error.name === "DatabaseError") {
-        res.status(400).send({
+      if (error instanceof AppError) {
+        return res.status(error.statusCode).send({
           name: error.name,
-          message: error.details,
+          code: error.code,
+          message: error.message,
+          details: error.details,
         });
-      } else {
-        fastify.log.error(error);
-        res.status(500).send({ error: "Failed to login" });
       }
+
+      fastify.log.error(error);
+      res.status(500).send({ error: "Failed to login" });
     }
   });
 
@@ -45,15 +48,17 @@ const authController = async (fastify: FastifyInstance) => {
       await authService.register(req.body);
       res.status(201).send({ message: "User registered successfully" });
     } catch (error) {
-      if (error.name === "CustomZodError" || error.name === "DatabaseError") {
-        res.status(400).send({
+      if (error instanceof AppError) {
+        return res.status(error.statusCode).send({
           name: error.name,
-          message: error.details,
+          code: error.code,
+          message: error.message,
+          details: error.details,
         });
-      } else {
-        fastify.log.error(error);
-        res.status(500).send({ error: "Failed to register user" });
       }
+
+      fastify.log.error(error);
+      res.status(500).send({ error: "Failed to register user" });
     }
   });
 
@@ -70,15 +75,17 @@ const authController = async (fastify: FastifyInstance) => {
 
         res.status(200).send({ message: "User logged out successfully" });
       } catch (error) {
-        if (error.name === "CustomZodError" || error.name === "DatabaseError") {
-          res.status(400).send({
+        if (error instanceof AppError) {
+          return res.status(error.statusCode).send({
             name: error.name,
-            message: error.details,
+            code: error.code,
+            message: error.message,
+            details: error.details,
           });
-        } else {
-          fastify.log.error(error);
-          res.status(500).send({ error: "Failed to refresh token" });
         }
+
+        fastify.log.error(error);
+        res.status(500).send({ error: "Failed to refresh token" });
       }
     }
   );
@@ -91,15 +98,17 @@ const authController = async (fastify: FastifyInstance) => {
 
       res.status(200).send({ message: "Password updated successfully" });
     } catch (error) {
-      if (error.name === "CustomZodError" || error.name === "DatabaseError") {
-        res.status(400).send({
+      if (error instanceof AppError) {
+        return res.status(error.statusCode).send({
           name: error.name,
-          message: error.details,
+          code: error.code,
+          message: error.message,
+          details: error.details,
         });
-      } else {
-        fastify.log.error(error);
-        res.status(500).send({ error: "Failed to update password" });
       }
+
+      fastify.log.error(error);
+      res.status(500).send({ error: "Failed to update password" });
     }
   });
 };

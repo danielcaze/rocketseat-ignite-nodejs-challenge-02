@@ -1,12 +1,13 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
-import { ACCESS_TOKEN_COOKIE, SESSION_ID_COOKIE } from "../enums/tokens";
+import { ACCESS_TOKEN_COOKIE, SESSION_ID_COOKIE } from "../enums/token";
 import jwt from "jsonwebtoken";
 import { env } from "../libs/dotenv";
 import type { User } from "../types/user";
-import { AuthService } from "../services/auth.service";
 import db from "../libs/knex";
-import { TABLES } from "../enums/tables";
+import { Table } from "../enums/table";
 import { refreshToken } from "../utils/tokens";
+import { AppError } from "../utils/app-error";
+import { ErrorCode } from "../enums/app-error";
 
 export async function checkUserLoggedIn(
   req: FastifyRequest,
@@ -22,10 +23,10 @@ export async function checkUserLoggedIn(
   try {
     const user = jwt.verify(token, env.JWT_SECRET);
 
-    const session = await db(TABLES.SESSIONS).where({ id: sessionId }).first();
+    const session = await db(Table.SESSIONS).where({ id: sessionId }).first();
 
     if (!session || session?.revoked) {
-      throw new Error("Session revoked");
+      throw new AppError(ErrorCode.SESSION_REVOKED);
     }
 
     req.user = user as User;

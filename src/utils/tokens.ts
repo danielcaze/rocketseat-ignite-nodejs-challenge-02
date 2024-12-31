@@ -1,10 +1,12 @@
-import { TABLES } from "../enums/tables";
-import { ACCESS_TOKEN_DURATION, REFRESH_TOKEN_DURATION } from "../enums/tokens";
+import { Table } from "../enums/table";
+import { ACCESS_TOKEN_DURATION, REFRESH_TOKEN_DURATION } from "../enums/token";
 import { env } from "../libs/dotenv";
 import db from "../libs/knex";
 import type { User } from "../types/user";
 import jwt from "jsonwebtoken";
-import { DatabaseError } from "./database-error";
+import { createDatabaseError } from "./create-database-error";
+import { ErrorCode } from "../enums/app-error";
+import { AppError } from "./app-error";
 
 export const generateAccessToken = (user: User) => {
   const accessToken = jwt.sign(user, env.JWT_SECRET, {
@@ -28,20 +30,20 @@ export async function refreshToken(accessToken: string, sessionId: string) {
   const decoded = jwt.decode(accessToken, { json: true });
 
   if (!decoded) {
-    throw new Error("Invalid token");
+    throw new AppError(ErrorCode.INVALID_TOKEN);
   }
 
-  const user = await db(TABLES.USERS)
+  const user = await db(Table.USERS)
     .where({
       id: decoded.id,
     })
     .first();
 
   if (!user) {
-    throw new Error("Invalid user");
+    throw new AppError(ErrorCode.USER_NOT_FOUND);
   }
 
-  const session = await db(TABLES.SESSIONS)
+  const session = await db(Table.SESSIONS)
     .where({ user_id: decoded.id, id: sessionId })
     .first();
 
@@ -50,7 +52,7 @@ export async function refreshToken(accessToken: string, sessionId: string) {
     session.revoked ||
     new Date(session.expires_at) < new Date()
   ) {
-    throw new Error("Refresh token expired or invalid");
+    throw new AppError(ErrorCode.REFRESH_TOKEN_INVALID);
   }
 
   const newAccessToken = generateAccessToken(user);
@@ -58,7 +60,7 @@ export async function refreshToken(accessToken: string, sessionId: string) {
   const newRefreshToken = generateRefreshToken(user);
 
   try {
-    await db(TABLES.SESSIONS)
+    await db(Table.SESSIONS)
       .where({
         id: sessionId,
       })
@@ -68,7 +70,7 @@ export async function refreshToken(accessToken: string, sessionId: string) {
       });
   } catch (error) {
     if ("code" in error) {
-      throw new DatabaseError(error);
+      throw createDatabaseError(error);
     }
     throw error;
   }

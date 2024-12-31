@@ -1,0 +1,68 @@
+export enum ErrorCode {
+  UNKNOWN_ERROR = "UNKNOWN_ERROR",
+  USER_NOT_FOUND = "USER_NOT_FOUND",
+
+  // Database
+  DATABASE_ERROR = "DATABASE_ERROR",
+  DUPLICATE_ENTRY = "DUPLICATE_ENTRY",
+  FOREIGN_KEY_CONFLICT = "FOREIGN_KEY_CONFLICT",
+
+  // Zod
+  VALIDATION_ERROR = "VALIDATION_ERROR",
+
+  // Auth
+  SESSION_REVOKED = "SESSION_REVOKED",
+  UNAUTHORIZED = "UNAUTHORIZED",
+  TOKEN_EXPIRED = "TOKEN_EXPIRED",
+  INVALID_CREDENTIALS = "INVALID_CREDENTIALS",
+  INVALID_OR_EXPIRED_VERIFICATION_CODE = "INVALID_OR_EXPIRED_VERIFICATION_CODE",
+  VERIFICATION_CODE_USED = "VERIFICATION_CODE_USED",
+  INVALID_TOKEN = "INVALID_TOKEN",
+  REFRESH_TOKEN_INVALID = "REFRESH_TOKEN_INVALID",
+}
+
+export enum ErrorMessage {
+  UNKNOWN_ERROR = "An unexpected error occurred",
+  USER_NOT_FOUND = "User not found",
+
+  // Database
+  DATABASE_ERROR = "A database error occurred",
+  DUPLICATE_ENTRY = "A duplicate entry already exists",
+  FOREIGN_KEY_CONFLICT = "A foreign key constraint failed",
+
+  // Zod
+  VALIDATION_ERROR = "Validation failed",
+
+  // Auth
+  SESSION_REVOKED = "Your session has been revoked",
+  UNAUTHORIZED = "Unauthorized",
+  TOKEN_EXPIRED = "Token has expired",
+  INVALID_CREDENTIALS = "Invalid credentials",
+  INVALID_OR_EXPIRED_VERIFICATION_CODE = "Invalid or expired verification code",
+  VERIFICATION_CODE_USED = "Verification code has already been used",
+  INVALID_TOKEN = "Invalid token",
+  REFRESH_TOKEN_INVALID = "Refresh token expired or invalid",
+}
+
+export enum ErrorStatusCode {
+  UNKNOWN_ERROR = 500,
+  USER_NOT_FOUND = 404,
+
+  // Database
+  DATABASE_ERROR = 500,
+  DUPLICATE_ENTRY = 409,
+  FOREIGN_KEY_CONFLICT = 409,
+
+  // Zod
+  VALIDATION_ERROR = 400,
+
+  // Auth
+  SESSION_REVOKED = 401,
+  UNAUTHORIZED = 401,
+  TOKEN_EXPIRED = 401,
+  INVALID_CREDENTIALS = 401,
+  INVALID_OR_EXPIRED_VERIFICATION_CODE = 400,
+  VERIFICATION_CODE_USED = 400,
+  INVALID_TOKEN = 401,
+  REFRESH_TOKEN_INVALID = 401,
+}
