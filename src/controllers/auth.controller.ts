@@ -16,18 +16,17 @@ const authController = async (fastify: FastifyInstance) => {
         req.ip
       );
 
-      res.cookie(ACCESS_TOKEN_COOKIE, accessToken, {
+      res.setCookie(ACCESS_TOKEN_COOKIE, accessToken, {
         path: "/",
         secure: env.NODE_ENV === "production",
-        httpOnly: true,
       });
-      res.cookie(SESSION_ID_COOKIE, sessionId, {
+      res.setCookie(SESSION_ID_COOKIE, sessionId, {
         path: "/",
         secure: env.NODE_ENV === "production",
         httpOnly: true,
       });
 
-      res.status(200).send({ message: "User logged in successfully" });
+      return res.status(200).send({ message: "User logged in successfully" });
     } catch (error) {
       if (error instanceof AppError) {
         return res.status(error.statusCode).send({
@@ -39,14 +38,14 @@ const authController = async (fastify: FastifyInstance) => {
       }
 
       fastify.log.error(error);
-      res.status(500).send({ error: "Failed to login" });
+      return res.status(500).send({ error: "Failed to login" });
     }
   });
 
   fastify.post("/register", async (req, res) => {
     try {
       await authService.register(req.body);
-      res.status(201).send({ message: "User registered successfully" });
+      return res.status(201).send({ message: "User registered successfully" });
     } catch (error) {
       if (error instanceof AppError) {
         return res.status(error.statusCode).send({
@@ -58,7 +57,7 @@ const authController = async (fastify: FastifyInstance) => {
       }
 
       fastify.log.error(error);
-      res.status(500).send({ error: "Failed to register user" });
+      return res.status(500).send({ error: "Failed to register user" });
     }
   });
 
@@ -73,7 +72,9 @@ const authController = async (fastify: FastifyInstance) => {
         res.clearCookie(ACCESS_TOKEN_COOKIE);
         res.clearCookie(SESSION_ID_COOKIE);
 
-        res.status(200).send({ message: "User logged out successfully" });
+        return res
+          .status(200)
+          .send({ message: "User logged out successfully" });
       } catch (error) {
         if (error instanceof AppError) {
           return res.status(error.statusCode).send({
@@ -85,7 +86,7 @@ const authController = async (fastify: FastifyInstance) => {
         }
 
         fastify.log.error(error);
-        res.status(500).send({ error: "Failed to refresh token" });
+        return res.status(500).send({ error: "Failed to refresh token" });
       }
     }
   );
@@ -96,7 +97,7 @@ const authController = async (fastify: FastifyInstance) => {
 
       await authService.updatePassword(req.body, sessionId);
 
-      res.status(200).send({ message: "Password updated successfully" });
+      return res.status(200).send({ message: "Password updated successfully" });
     } catch (error) {
       if (error instanceof AppError) {
         return res.status(error.statusCode).send({
@@ -108,7 +109,7 @@ const authController = async (fastify: FastifyInstance) => {
       }
 
       fastify.log.error(error);
-      res.status(500).send({ error: "Failed to update password" });
+      return res.status(500).send({ error: "Failed to update password" });
     }
   });
 };

@@ -1,6 +1,7 @@
 export enum ErrorCode {
   UNKNOWN_ERROR = "UNKNOWN_ERROR",
   USER_NOT_FOUND = "USER_NOT_FOUND",
+  MEAL_NOT_FOUND = "MEAL_NOT_FOUND",
 
   // Database
   DATABASE_ERROR = "DATABASE_ERROR",
@@ -24,6 +25,7 @@ export enum ErrorCode {
 export enum ErrorMessage {
   UNKNOWN_ERROR = "An unexpected error occurred",
   USER_NOT_FOUND = "User not found",
+  MEAL_NOT_FOUND = "Meal not found",
 
   // Database
   DATABASE_ERROR = "A database error occurred",
@@ -47,6 +49,7 @@ export enum ErrorMessage {
 export enum ErrorStatusCode {
   UNKNOWN_ERROR = 500,
   USER_NOT_FOUND = 404,
+  MEAL_NOT_FOUND = 404,
 
   // Database
   DATABASE_ERROR = 500,

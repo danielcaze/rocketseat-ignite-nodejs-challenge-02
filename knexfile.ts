@@ -13,6 +13,7 @@ const config: { [key: string]: Knex.Config } = {
     seeds: {
       directory: "./db/seeds",
     },
+    postProcessResponse,
   },
 
   staging: {
@@ -30,6 +31,7 @@ const config: { [key: string]: Knex.Config } = {
     seeds: {
       directory: "./db/seeds",
     },
+    postProcessResponse,
   },
 
   production: {
@@ -47,7 +49,27 @@ const config: { [key: string]: Knex.Config } = {
     seeds: {
       directory: "./db/seeds",
     },
+    postProcessResponse,
   },
 };
+
+function postProcessResponse(result: any) {
+  if (Array.isArray(result)) {
+    return result.map(parseRow);
+  }
+  return parseRow(result);
+}
+
+function parseRow(row: any) {
+  if (!row || typeof row !== "object") return row;
+
+  for (const key of Object.keys(row)) {
+    if (key.startsWith("is_") && (row[key] === 0 || row[key] === 1)) {
+      row[key] = !!row[key];
+    }
+  }
+
+  return row;
+}
 
 export default config;

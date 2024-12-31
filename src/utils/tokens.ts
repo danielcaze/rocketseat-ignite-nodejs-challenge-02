@@ -49,7 +49,7 @@ export async function refreshToken(accessToken: string, sessionId: string) {
 
   if (
     !session ||
-    session.revoked ||
+    session.is_revoked ||
     new Date(session.expires_at) < new Date()
   ) {
     throw new AppError(ErrorCode.REFRESH_TOKEN_INVALID);

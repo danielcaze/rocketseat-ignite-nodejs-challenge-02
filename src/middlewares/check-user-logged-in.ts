@@ -25,7 +25,7 @@ export async function checkUserLoggedIn(
 
     const session = await db(Table.SESSIONS).where({ id: sessionId }).first();
 
-    if (!session || session?.revoked) {
+    if (!session || session?.is_revoked) {
       throw new AppError(ErrorCode.SESSION_REVOKED);
     }
 
@@ -40,7 +40,10 @@ export async function checkUserLoggedIn(
     try {
       const newAccessToken = await refreshToken(token, sessionId);
 
-      res.setCookie(ACCESS_TOKEN_COOKIE, newAccessToken);
+      res.setCookie(ACCESS_TOKEN_COOKIE, newAccessToken, {
+        path: "/",
+        secure: env.NODE_ENV === "production",
+      });
       const user = jwt.decode(newAccessToken);
       req.user = user as User;
     } catch (err) {

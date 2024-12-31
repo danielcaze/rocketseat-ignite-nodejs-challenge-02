@@ -20,8 +20,8 @@ export function createZodError(error: z.ZodError) {
 
   return new AppError(
     ErrorCode.VALIDATION_ERROR,
-    ErrorMessage[ErrorCode.VALIDATION_ERROR],
-    ErrorStatusCode[ErrorCode.VALIDATION_ERROR],
+    undefined,
+    undefined,
     details
   );
 }

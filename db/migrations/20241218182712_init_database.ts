@@ -32,7 +32,7 @@ export async function up(knex: Knex): Promise<void> {
     table.text("user_agent").nullable();
     table.text("ip_address").nullable();
     table.datetime("expires_at").notNullable();
-    table.boolean("revoked").defaultTo(false);
+    table.boolean("is_revoked").defaultTo(false);
     table.timestamps(true, true);
 
     table
@@ -47,7 +47,7 @@ export async function up(knex: Knex): Promise<void> {
     table.uuid("user_id").notNullable();
     table.string("code", 6).notNullable();
     table.timestamp("expires_at").notNullable();
-    table.boolean("used").defaultTo(false);
+    table.boolean("is_used").defaultTo(false);
     table.timestamps(true, true);
 
     table

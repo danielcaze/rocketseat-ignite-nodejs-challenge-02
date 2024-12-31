@@ -134,7 +134,7 @@ export class AuthService {
           id: sessionId,
         })
         .update({
-          revoked: true,
+          is_revoked: true,
           updated_at: new Date(),
         });
     } catch (error) {
@@ -166,14 +166,14 @@ export class AuthService {
       throw new AppError(ErrorCode.INVALID_OR_EXPIRED_VERIFICATION_CODE);
     }
 
-    if (verificationRecord.used) {
+    if (verificationRecord.is_used) {
       throw new AppError(ErrorCode.VERIFICATION_CODE_USED);
     }
 
     try {
       await db(Table.VERIFICATION_CODES)
         .where({ id: verificationRecord.id })
-        .update({ used: true });
+        .update({ is_used: true });
 
       const hashedPassword = await bcrypt.hash(body.newPassword, 10);
 
@@ -182,9 +182,9 @@ export class AuthService {
       });
 
       await db(Table.SESSIONS)
-        .where({ user_id: body.userId, revoked: false })
+        .where({ user_id: body.userId, is_revoked: false })
         .andWhereNot({ id: sessionId })
-        .update({ revoked: true });
+        .update({ is_revoked: true });
     } catch (error) {
       if ("code" in error) {
         throw createDatabaseError(error);

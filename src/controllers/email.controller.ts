@@ -8,7 +8,7 @@ const emailController = async (fastify: FastifyInstance) => {
   fastify.post("/verification-code", async (req, res) => {
     try {
       await emailService.sendVerificationCode(req.body);
-      res.status(200).send({ message: "Verification code sent" });
+      return res.status(200).send({ message: "Verification code sent" });
     } catch (error) {
       if (error instanceof AppError) {
         return res.status(error.statusCode).send({
@@ -20,9 +20,9 @@ const emailController = async (fastify: FastifyInstance) => {
       }
 
       fastify.log.error(error);
-      res
+      return res
         .status(500)
-        .send({ error: "Ocorreu um erro ao enviar o código de verificação." });
+        .send({ error: "Failed to send verification code" });
     }
   });
 };
