@@ -4,6 +4,7 @@ import { env } from "../libs/dotenv";
 import db from "../libs/knex";
 import type { User } from "../types/user";
 import jwt from "jsonwebtoken";
+import { DatabaseError } from "./database-error";
 
 export const generateAccessToken = (user: User) => {
   const accessToken = jwt.sign(user, env.JWT_SECRET, {
@@ -40,7 +41,7 @@ export async function refreshToken(accessToken: string, sessionId: string) {
     throw new Error("Invalid user");
   }
 
-  const session = await db("sessions")
+  const session = await db(TABLES.SESSIONS)
     .where({ user_id: decoded.id, id: sessionId })
     .first();
 
@@ -56,15 +57,21 @@ export async function refreshToken(accessToken: string, sessionId: string) {
 
   const newRefreshToken = generateRefreshToken(user);
 
-  await db(TABLES.SESSIONS)
-    .where({
-      id: sessionId,
-    })
-    .update({
-      refresh_token: newRefreshToken,
-      expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
-      updated_at: new Date(),
-    });
+  try {
+    await db(TABLES.SESSIONS)
+      .where({
+        id: sessionId,
+      })
+      .update({
+        refresh_token: newRefreshToken,
+        expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
+      });
+  } catch (error) {
+    if ("code" in error) {
+      throw new DatabaseError(error);
+    }
+    throw error;
+  }
 
   return newAccessToken;
 }

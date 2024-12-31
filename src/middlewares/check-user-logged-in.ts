@@ -24,7 +24,7 @@ export async function checkUserLoggedIn(
 
     const session = await db(TABLES.SESSIONS).where({ id: sessionId }).first();
 
-    if (!session || (session && session.revoked)) {
+    if (!session || session?.revoked) {
       throw new Error("Session revoked");
     }
 

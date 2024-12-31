@@ -82,6 +82,26 @@ const authController = async (fastify: FastifyInstance) => {
       }
     }
   );
+
+  fastify.post("/update-password", async (req, res) => {
+    try {
+      const sessionId = req.cookies[SESSION_ID_COOKIE];
+
+      await authService.updatePassword(req.body, sessionId);
+
+      res.status(200).send({ message: "Password updated successfully" });
+    } catch (error) {
+      if (error.name === "CustomZodError" || error.name === "DatabaseError") {
+        res.status(400).send({
+          name: error.name,
+          message: error.details,
+        });
+      } else {
+        fastify.log.error(error);
+        res.status(500).send({ error: "Failed to update password" });
+      }
+    }
+  });
 };
 
 export default authController;

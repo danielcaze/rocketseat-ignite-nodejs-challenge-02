@@ -1,19 +1,23 @@
 import { config } from "dotenv";
 import { z } from "zod";
-import jwt from "jsonwebtoken";
+import type jwt from "jsonwebtoken";
 
-if (process.env.NODE_ENV === "test") {
+if (process.env.NODE_ENV === "development") {
+  console.log("Using .env.test");
   config({ path: ".env.test" });
 } else {
+  console.log("Using .env");
   config();
 }
 
 const envSchema = z.object({
-  NODE_ENV: z.enum(["development", "test", "production"]).default("production"),
+  NODE_ENV: z.enum(["development", "production"]).default("production"),
   DATABASE_URL: z.string(),
   JWT_SECRET: z.string(),
   JWT_SECRET_ALGORITHM: z.custom<jwt.Algorithm>(),
   PORT: z.coerce.number().default(3333),
+  EMAIL_SENDER_USER: z.string(),
+  EMAIL_SENDER_PASSWORD: z.string(),
 });
 
 const _env = envSchema.safeParse(process.env);
