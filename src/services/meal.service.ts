@@ -5,6 +5,7 @@ import { Table } from "../enums/table";
 import { createDatabaseError } from "../utils/create-database-error";
 import { AppError } from "../utils/app-error";
 import { ErrorCode } from "../enums/app-error";
+import { safeJsonParse } from "../utils/safe-json-parse";
 
 export class MealService {
   private registerMealSchema = z.object({
@@ -107,8 +108,21 @@ export class MealService {
     }
   }
 
-  async getAllFromUser(userId: string) {
-    const meals = await db(Table.MEALS).where({ user_id: userId }).select();
+  async getAllFromUser(userId: string, query: Record<string, any>) {
+    const queryBuilder = db(Table.MEALS).where({ user_id: userId });
+
+    for (const [key, value] of Object.entries(query)) {
+      if (Array.isArray(value)) {
+        queryBuilder.whereIn(
+          key,
+          value.map((v) => safeJsonParse(v))
+        );
+      } else {
+        queryBuilder.where(key, safeJsonParse(value));
+      }
+    }
+
+    const meals = await queryBuilder.orderBy("created_at", "desc").select();
 
     return meals;
   }

@@ -10,7 +10,10 @@ const mealController = async (fastify: FastifyInstance) => {
 
   fastify.get("/", { preHandler: [checkUserLoggedIn] }, async (req, res) => {
     try {
-      const meals = await mealService.getAllFromUser(req.user!.id);
+      const meals = await mealService.getAllFromUser(
+        req.user!.id,
+        req.query as any
+      );
       return res.status(200).send({ meals });
     } catch (error) {
       if (error instanceof AppError) {

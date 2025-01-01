@@ -2,6 +2,7 @@ import Fastify from "fastify";
 import cookie from "@fastify/cookie";
 import mealController from "./controllers/meal.controller";
 import authController from "./controllers/auth.controller";
+import userController from "./controllers/user.controller";
 import emailController from "./controllers/email.controller";
 
 export const app = Fastify({
@@ -13,6 +14,7 @@ app.register(cookie);
 app.register(
   async (instance) => {
     instance.register(authController, { prefix: "/auth" });
+    instance.register(userController, { prefix: "/user" });
     instance.register(mealController, { prefix: "/meal" });
     instance.register(emailController, { prefix: "/email" });
   },
