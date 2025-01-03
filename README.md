@@ -5,7 +5,7 @@ This application is a **meal tracking** system where users can sign up, log in, 
 ## Features
 
 - **User registration**
-- **User login** (with JWT-based auth)
+- **User login** (with Session-based auth)
 - **Meal registration** (track whether each meal is within the diet or not)
 - **Meal management** (CRUD)
 - **Metrics** (e.g., total meals, best streak within diet, etc.)
@@ -46,8 +46,6 @@ Create a `.env` file at the root of the project (if you haven't already) and set
 
 ```
 DATABASE_URL=mysql2://root:123123@localhost:3306/rocketseat_ignite_nodejs_challenge_02
-JWT_SECRET=someverysecrettext
-JWT_SECRET_ALGORITHM=HS256
 NODE_ENV=development
 EMAIL_SENDER_USER=your_email@gmail.com
 EMAIL_SENDER_PASSWORD=some_password

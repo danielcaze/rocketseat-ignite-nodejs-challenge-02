@@ -1,6 +1,5 @@
 import { config } from "dotenv";
 import { z } from "zod";
-import type jwt from "jsonwebtoken";
 
 if (process.env.NODE_ENV === "development") {
   console.log("Using .env.test");
@@ -13,8 +12,6 @@ if (process.env.NODE_ENV === "development") {
 const envSchema = z.object({
   NODE_ENV: z.enum(["development", "production"]).default("production"),
   DATABASE_URL: z.string(),
-  JWT_SECRET: z.string(),
-  JWT_SECRET_ALGORITHM: z.custom<jwt.Algorithm>(),
   PORT: z.coerce.number().default(3333),
   EMAIL_SENDER_USER: z.string(),
   EMAIL_SENDER_PASSWORD: z.string(),

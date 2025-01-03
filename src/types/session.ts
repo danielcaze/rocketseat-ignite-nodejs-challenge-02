@@ -1,7 +1,7 @@
 export interface Session {
   id: string;
   user_id: string;
-  refresh_token: string;
+  csrf_token: string;
   user_agent?: string;
   ip_address?: string;
   expires_at: Date | string;

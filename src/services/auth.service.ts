@@ -4,7 +4,7 @@ import db from "../libs/knex";
 import { Table } from "../enums/table";
 import { env } from "../libs/dotenv";
 import { createDatabaseError } from "../utils/create-database-error";
-import { generateAccessToken, generateRefreshToken } from "../utils/tokens";
+import { generateCsrfToken } from "../utils/tokens";
 import { createZodError } from "../utils/create-zod-error";
 import { AppError } from "../utils/app-error";
 import { ErrorCode, ErrorMessage, ErrorStatusCode } from "../enums/app-error";
@@ -102,9 +102,7 @@ export class AuthService {
       throw new AppError(ErrorCode.INVALID_CREDENTIALS);
     }
 
-    const accessToken = generateAccessToken(user);
-
-    const refreshToken = generateRefreshToken(user);
+    const csrfToken = generateCsrfToken();
 
     try {
       const sessionId = crypto.randomUUID();
@@ -112,13 +110,13 @@ export class AuthService {
       await db(Table.SESSIONS).insert({
         id: sessionId,
         user_id: user.id,
-        refresh_token: refreshToken,
+        csrf_token: csrfToken,
         user_agent: userAgent,
         ip_address: ipAddress,
         expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
       });
 
-      return { accessToken, sessionId };
+      return { csrfToken, sessionId };
     } catch (error) {
       if ("code" in error) {
         throw createDatabaseError(error);

@@ -28,7 +28,7 @@ export async function up(knex: Knex): Promise<void> {
   await knex.schema.createTable("sessions", (table) => {
     table.uuid("id").primary().defaultTo(knex.fn.uuid());
     table.uuid("user_id").notNullable();
-    table.text("refresh_token").notNullable();
+    table.text("csrf_token").notNullable();
     table.text("user_agent").nullable();
     table.text("ip_address").nullable();
     table.datetime("expires_at").notNullable();

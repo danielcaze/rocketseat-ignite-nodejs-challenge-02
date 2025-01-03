@@ -1,7 +1,7 @@
 import type { FastifyInstance } from "fastify";
 import { AuthService } from "../services/auth.service";
 import { checkUserLoggedIn } from "../middlewares/check-user-logged-in";
-import { ACCESS_TOKEN_COOKIE, SESSION_ID_COOKIE } from "../enums/token";
+import { CSRF_TOKEN_COOKIE, SESSION_ID_COOKIE } from "../enums/token";
 import { env } from "../libs/dotenv";
 import { AppError } from "../utils/app-error";
 
@@ -10,20 +10,24 @@ const authController = async (fastify: FastifyInstance) => {
 
   fastify.post("/login", async (req, res) => {
     try {
-      const { accessToken, sessionId } = await authService.login(
+      const { csrfToken, sessionId } = await authService.login(
         req.body,
         req.headers["user-agent"],
         req.ip
       );
 
-      res.setCookie(ACCESS_TOKEN_COOKIE, accessToken, {
-        path: "/",
-        secure: env.NODE_ENV === "production",
-      });
       res.setCookie(SESSION_ID_COOKIE, sessionId, {
         path: "/",
         secure: env.NODE_ENV === "production",
         httpOnly: true,
+        sameSite: "strict",
+      });
+
+      res.setCookie(CSRF_TOKEN_COOKIE, csrfToken, {
+        path: "/",
+        secure: env.NODE_ENV === "production",
+        httpOnly: false,
+        sameSite: "strict",
       });
 
       return res.status(200).send({ message: "User logged in successfully" });
@@ -69,7 +73,7 @@ const authController = async (fastify: FastifyInstance) => {
         const sessionId = req.cookies[SESSION_ID_COOKIE]!;
 
         await authService.logout(sessionId);
-        res.clearCookie(ACCESS_TOKEN_COOKIE);
+        res.clearCookie(CSRF_TOKEN_COOKIE);
         res.clearCookie(SESSION_ID_COOKIE);
 
         return res
